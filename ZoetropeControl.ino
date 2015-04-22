@@ -40,15 +40,15 @@ Adafruit_StepperMotor *stepper;
 int prevSensorReading;
 
 /* Convert a frequency value to the TOP CTC value.
- * The effective range is 7812.5Hz to 0.1192Hz
+ * The effective range is 15625Hz to 0.23842Hz
  */
 uint16_t freq_to_TOP(float hertz)
 {
   uint16_t top;
 
-  hertz = constrain(hertz, 0.1192f, 7812.5f);
+  hertz = constrain(hertz, 0.23842f, 15625.0f);
 
-  top = (F_CPU / (216 * 1024 * hertz ) * 2) - 1;
+  top = (F_CPU / (1024 * hertz) - 1);
   return top;
 }
 
@@ -115,7 +115,7 @@ void setup()
   TCCR1B |= (1<<WGM12);
 
   /* Start with a 'sane' frequency setting */
-  OCR1A = freq_to_TOP(2);
+  OCR1A = freq_to_TOP(1);
 
   /* Enable the Timer 1A compare match interrupt
    * Every time the counter equals the TOP value (in the OCR1A register)
@@ -138,6 +138,7 @@ void loop() {
   /* FIXME: possibly some smoothing or hystheresis here? */
   if (sensorReading != prevSensorReading) {
     float freq = map(sensorReading, 0, 1023, LED_STROBE_FREQ_MIN, LED_STROBE_FREQ_MAX);
+    set_strobe_freq(freq);
     prevSensorReading = sensorReading;
   }
 
